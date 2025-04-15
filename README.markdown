@@ -79,8 +79,7 @@ backend/
 
 ### Шаг 1: Клонирование репозитория
 ```bash
-git clone <repository-url>
-cd <repository-name>
+git clone https://github.com/AutoMagin/StudPract-Fastapi.git
 ```
 
 ### Шаг 2: Настройка бэкенда
