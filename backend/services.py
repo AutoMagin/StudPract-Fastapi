@@ -4,9 +4,9 @@ from jose import JWTError, jwt
 from fastapi import HTTPException, status, Depends
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
-from .database import get_db
-from .repositories import UserRepository
-from .models import User
+from database import get_db
+from repositories import UserRepository
+from models import User
 
 SECRET_KEY = "tokentokentokentokentokentoken"  # Замените на свой секретный ключ
 ALGORITHM = "HS256"

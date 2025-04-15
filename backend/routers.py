@@ -1,15 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from .database import get_db
-from .schemas import UserCreate, UserUpdate, UserResponse, PostCreate, PostUpdate, PostResponse
-from .repositories import UserRepository, PostRepository
-from .services import TokenService
-from .models import User, Post
+from database import get_db
+from schemas import UserCreate, UserUpdate, UserResponse, PostCreate, PostUpdate, PostResponse
+from repositories import UserRepository, PostRepository
+from services import TokenService
+from models import User, Post
 import hashlib
 import os
 from typing import List, Optional, Dict
-from .utils import generate_random_user
+from utils import generate_random_user
 
 router = APIRouter(prefix="/users", tags=["users"])
 

@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Table
 from sqlalchemy.orm import relationship
-from .database import Base
+from database import Base
 
 # Таблица для связи многие-ко-многим между пользователями и постами (лайки)
 post_likes = Table(

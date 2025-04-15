@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from .routers import router
-from .database import init_db
+from routers import router
+from database import init_db
 import sys
 import os
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
