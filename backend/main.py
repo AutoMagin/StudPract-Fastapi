@@ -24,8 +24,8 @@ async def startup_event():
 # Настройка CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "https://studpract-fastapi.onrender.com"],
-    allow_credentials=True,
+    allow_origins=["https://twitterclonepract.netlify.app", "https://studpract-fastapi.onrender.com"],
+    allow_credentials=True, 
     allow_methods=["*"],
     allow_headers=["*"],
 )
