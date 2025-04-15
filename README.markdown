@@ -57,21 +57,7 @@ cd studa_practe
    pip install -r requirements.txt
    ```
 
-   Зависимости (`requirements.txt`):
-
-   ```
-   fastapi==0.115.0
-   uvicorn==0.30.6
-   sqlalchemy==2.0.35
-   psycopg2-binary==2.9.9
-   pydantic==2.9.2
-   passlib==1.7.4
-   bcrypt==4.2.0
-   python-jose==3.3.0
-   cryptography==43.0.1
-   python-multipart==0.0.9
-   faker==30.0.0
-   ```
+   Зависимости (`requirements.txt`)
 
 3. **Настройте PostgreSQL**:
 
@@ -120,22 +106,7 @@ cd studa_practe
    npm install
    ```
 
-   Зависимости (`package.json`):
-
-   ```json
-   "dependencies": {
-     "@emotion/react": "^11.13.3",
-     "@emotion/styled": "^11.13.0",
-     "@fontsource/roboto": "^5.0.0",
-     "@mui/material": "^6.1.1",
-     "axios": "^1.7.7",
-     "jwt-decode": "^4.0.0",
-     "react": "^18.3.1",
-     "react-dom": "^18.3.1",
-     "react-router-dom": "^6.26.2",
-     "react-scripts": "^5.0.1"
-   }
-   ```
+   Зависимости (`package.json`)
 
 3. **Запустите фронтенд**:
 
@@ -158,123 +129,12 @@ cd studa_practe
 
 1. Откройте `http://localhost:8000/docs`.
 2. Найдите маршрут `POST /users/random`.
-3. Укажите параметр `count` (например, `20`) и выполните запрос.
-4. Это создаст указанное количество случайных пользователей с русскими или английскими именами.
+3. Это создаст указанное количество случайных пользователей с русскими или английскими именами.
    - Логин: случайный (например, `johnsmith1234` или `ivanov5678`).
    - Имя: случайное (например, `John Smith` или `Иванов Сергей`).
    - Пароль: `password123` (для всех пользователей).
 
-## Развертывание в интернете
 
-Чтобы ваш проект стал доступен в интернете для других пользователей, выполните следующие шаги:
-
-### Развертывание бэкенда (Heroku)
-
-1. **Создайте аккаунт на Heroku**: Зарегистрируйтесь на Heroku.
-
-2. **Установите Heroku CLI**: Скачайте и установите Heroku CLI.
-
-3. **Создайте приложение**: В корне проекта выполните:
-
-   ```bash
-   heroku create your-app-name
-   ```
-
-4. **Добавьте базу данных**:
-
-   ```bash
-   heroku addons:create heroku-postgresql:hobby-dev --app your-app-name
-   ```
-
-5. **Настройте проект**:
-
-   - Создайте файл `Procfile` в корне проекта:
-
-     ```
-     web: uvicorn backend.main:app --host=0.0.0.0 --port=${PORT}
-     ```
-
-   - Обновите `backend/database.py` для использования переменной окружения:
-
-     ```python
-     import os
-     database_url = os.getenv("DATABASE_URL")
-     if database_url and database_url.startswith("postgres://"):
-         database_url = database_url.replace("postgres://", "postgresql://", 1)
-     SQLALCHEMY_DATABASE_URL = database_url
-     ```
-
-6. **Разверните бэкенд**:
-
-   ```bash
-   heroku git:remote -a your-app-name
-   git add .
-   git commit -m "Подготовка к развертыванию"
-   git push heroku master
-   ```
-
-   Бэкенд будет доступен по адресу `https://your-app-name.herokuapp.com`.
-
-### Развертывание фронтенда (Netlify)
-
-1. **Создайте аккаунт на Netlify**: Зарегистрируйтесь на Netlify.
-
-2. **Соберите React-приложение**:
-
-   ```bash
-   cd frontend
-   npm run build
-   ```
-
-3. **Разверните на Netlify**:
-
-   - Перетащите папку `build` в интерфейс Netlify или используйте CLI:
-
-     ```bash
-     netlify deploy --prod
-     ```
-
-   - Netlify предоставит URL, например, `https://your-app-name.netlify.app`.
-
-4. **Настройте URL бэкенда**:
-
-   - В Netlify задайте переменную окружения:
-
-     - В настройках сайта установите `REACT_APP_API_URL=https://your-app-name.herokuapp.com`.
-
-   - Убедитесь, что `frontend/src/services/axiosInstance.js` использует эту переменную:
-
-     ```javascript
-     const baseURL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
-     ```
-
-### Настройка CORS
-
-- В `backend/main.py` обновите `allow_origins` для включения URL фронтенда:
-
-  ```python
-  app.add_middleware(
-      CORSMiddleware,
-      allow_origins=["http://localhost:3000", "https://your-app-name.netlify.app"],
-      allow_credentials=True,
-      allow_methods=["*"],
-      allow_headers=["*"],
-  )
-  ```
-
-- Переразверните бэкенд после изменения:
-
-  ```bash
-  git add .
-  git commit -m "Обновление CORS"
-  git push heroku master
-  ```
-
-### Проверка
-
-- Перейдите на URL Netlify (например, `https://your-app-name.netlify.app`).
-- Зарегистрируйтесь, войдите, создайте посты, проверьте пагинацию и сортировку.
-- Убедитесь, что всё работает: создание пользователей, постов, лайки, редактирование профиля.
 
 ## Структура проекта
 
@@ -332,5 +192,3 @@ studa_practe/
   ```
 
   Настройте `alembic.ini` и `migrations/env.py` для работы с вашими моделями.
-
-- Для мониторинга в продакшене
