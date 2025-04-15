@@ -1,3 +1,4 @@
+// frontend/src/components/Update.js
 import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { userService } from '../services/userService';
@@ -5,22 +6,17 @@ import { AuthContext } from '../contexts/AuthContext';
 import { useLoading } from '../contexts/LoadingContext';
 import { TextField, Button, Typography, Box } from '@mui/material';
 
-export function Update() {
+export default function Update() {
   const { id } = useParams();
-  const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
+  const { user, setUser } = useContext(AuthContext);
+  const { setLoading } = useLoading();
   const [name, setName] = useState('');
   const [error, setError] = useState(null);
-  const { setLoading } = useLoading();
-  const navigate = useNavigate();
 
   useEffect(() => {
-    if (!user) {
-      navigate('/auth');
-      return;
-    }
-
-    if (user.id !== parseInt(id)) {
-      navigate(`/users/${user.id}`);
+    if (!user || parseInt(id) !== user.id) {
+      navigate(`/users/${id}`);
       return;
     }
 
@@ -32,18 +28,34 @@ export function Update() {
         setLoading(false);
       })
       .catch((err) => {
-        setError(err.message);
+        setError(
+          err.response?.status === 401
+            ? 'Необходима авторизация'
+            : err.response?.status === 404
+            ? 'Пользователь не найден'
+            : err.response?.data?.detail || err.message || 'Произошла ошибка при загрузке данных'
+        );
         setLoading(false);
       });
-  }, [id, user, setLoading, navigate]);
+  }, [id, user, navigate, setLoading]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
-      await userService.update(id, { name });
+      const updatedUser = await userService.update(id, { name });
+      setUser(updatedUser);
       navigate(`/users/${id}`);
     } catch (err) {
-      setError(err.message);
+      setError(
+        err.response?.status === 401
+          ? 'Необходима авторизация'
+          : err.response?.status === 404
+          ? 'Пользователь не найден'
+          : err.response?.data?.detail || err.message || 'Произошла ошибка при сохранении'
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -52,7 +64,7 @@ export function Update() {
   }
 
   return (
-    <Box className="update">
+    <Box className="container">
       <Typography variant="h4" gutterBottom>
         Обновить профиль
       </Typography>

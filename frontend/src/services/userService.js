@@ -1,22 +1,15 @@
 import axiosInstance from './axiosInstance';
 
 export const userService = {
-  register(user) {
-    return axiosInstance.post('/users/', user).then((response) => response.data);
+  get: (id) => axiosInstance.get(`/users/${id}`).then(response => response.data),
+  getUsers: (skip = 0, limit = 10, sortBy = null, search = null) => {
+    let url = `/users/?skip=${skip}&limit=${limit}`;
+    if (sortBy) url += `&sort_by=${sortBy}`;
+    if (search) url += `&search=${search}`;
+    return axiosInstance.get(url).then(response => response.data);
   },
-  login(user) {
-    return axiosInstance.post('/users/login', user).then((response) => response.data);
-  },
-  get(userId) {
-    return axiosInstance.get(`/users/${userId}`).then((response) => response.data);
-  },
-  getAll() {
-    return axiosInstance.get('/users/').then((response) => response.data);
-  },
-  update(userId, user) {
-    return axiosInstance.put(`/users/${userId}`, user).then((response) => response.data);
-  },
-  delete(userId) {
-    return axiosInstance.delete(`/users/${userId}`).then((response) => response.data);
-  },
+  create: (user) => axiosInstance.post(`/users/`, user).then(response => response.data),
+  update: (id, user) => axiosInstance.put(`/users/${id}`, user).then(response => response.data),
+  delete: (id) => axiosInstance.delete(`/users/${id}`).then(response => response.data),
+  login: (credentials) => axiosInstance.post(`/users/login`, credentials).then(response => response.data),
 };

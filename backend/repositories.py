@@ -1,118 +1,137 @@
 from sqlalchemy.orm import Session
-from sqlalchemy.sql import func
-from .models import User, Post, likes
-from .schemas import UserCreate, UserUpdate, PostCreate, PostUpdate
-import hashlib
-import os
+from .models import User, Post
+from typing import Optional, List
 
 class UserRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def find_user_by_login(self, login: str) -> User:
+    def get_by_login(self, login: str) -> Optional[User]:
         return self.db.query(User).filter(User.login == login).first()
 
-    def create_user(self, user: UserCreate) -> User:
-        salt = os.urandom(32).hex()
-        password_hash = hashlib.sha256((user.password + salt).encode()).hexdigest()
-        db_user = User(
-            login=user.login,
-            password_hash=password_hash,
-            password_salt=salt,
-            name=user.name 
-        )
-        self.db.add(db_user)
-        self.db.flush()
-        return db_user
+    def get(self, user_id: int) -> Optional[User]:
+        return self.db.query(User).filter(User.id == user_id).first()
 
-    def get_users(self) -> list[User]:
-        return self.db.query(User).all()
+    def get_all(self, skip: int = 0, limit: int = 10, sort_by: Optional[str] = None, search: Optional[str] = None) -> List[User]:
+        query = self.db.query(User)
+        if search:
+            query = query.filter(User.name.ilike(f"%{search}%"))
+        if sort_by:
+            if sort_by == "id":
+                query = query.order_by(User.id.asc())
+            elif sort_by == "id_desc":
+                query = query.order_by(User.id.desc())
+            elif sort_by == "name":
+                query = query.order_by(User.name.asc())
+            elif sort_by == "name_desc":
+                query = query.order_by(User.name.desc())
+        query = query.offset(skip).limit(limit)
+        users = query.all()
+        return users
 
-    def update_user(self, user_id: int, user: UserUpdate) -> User:
-        db_user = self.db.query(User).filter(User.id == user_id).first()
-        if db_user and user.name:
-            db_user.name = user.name
+    def update(self, user: User, user_update: dict) -> User:
+        try:
+            for key, value in user_update.items():
+                setattr(user, key, value)
             self.db.commit()
-            self.db.refresh(db_user)
-        return db_user
+            self.db.refresh(user)
+            return user
+        except Exception as e:
+            self.db.rollback()
+            print(f"Error in update user: {str(e)}")
+            raise
 
-    def delete_user(self, user_id: int) -> bool:
-        db_user = self.db.query(User).filter(User.id == user_id).first()
-        if db_user:
-            self.db.delete(db_user)
+    def delete(self, user: User):
+        try:
+            self.db.delete(user)
             self.db.commit()
-            return True
-        return False
+        except Exception as e:
+            self.db.rollback()
+            print(f"Error in delete user: {str(e)}")
+            raise
 
 class PostRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def create_post(self, post: PostCreate, user_id: int) -> Post:
-        db_post = Post(content=post.content, user_id=user_id)
-        self.db.add(db_post)
-        self.db.commit()
-        self.db.refresh(db_post)
-        return db_post
-
-   
-    def get_posts(self, skip: int = 0, limit: int = 10, current_user_id: int = None) -> list[Post]:
-        query = self.db.query(Post).order_by(Post.id.desc()).offset(skip).limit(limit)
-        posts = query.all()
-        for post in posts:
-            post.likes_count = len(post.liked_by)
-            post.liked_by_me = any(user.id == current_user_id for user in post.liked_by) if current_user_id else False
-        return posts
-
-    def get_posts_by_user(self, user_id: int, current_user_id: int = None) -> list[Post]:
-        query = self.db.query(Post).filter(Post.user_id == user_id).order_by(Post.id.desc())
-        posts = query.all()
-        for post in posts:
-            post.likes_count = len(post.liked_by)
-            post.liked_by_me = any(user.id == current_user_id for user in post.liked_by) if current_user_id else False
-        return posts
-
-    def get_post(self, post_id: int, current_user_id: int = None) -> Post:
-        post = self.db.query(Post).filter(Post.id == post_id).first()
-        if post:
-            post.likes_count = len(post.liked_by)
-            post.liked_by_me = any(user.id == current_user_id for user in post.liked_by) if current_user_id else False
-        return post
-
-    def update_post(self, post_id: int, post: PostUpdate) -> Post:
-        db_post = self.db.query(Post).filter(Post.id == post_id).first()
-        if db_post and post.content:
-            db_post.content = post.content
+    def create(self, post: Post):
+        try:
+            self.db.add(post)
             self.db.commit()
-            self.db.refresh(db_post)
-        return db_post
+            self.db.refresh(post)
+            return post
+        except Exception as e:
+            self.db.rollback()
+            print(f"Error in create post: {str(e)}")
+            raise
 
-    def delete_post(self, post_id: int) -> bool:
-        db_post = self.db.query(Post).filter(Post.id == post_id).first()
-        if db_post:
-            self.db.delete(db_post)
-            self.db.commit()
-            return True
-        return False
+    def get(self, post_id: int) -> Optional[Post]:
+        return self.db.query(Post).filter(Post.id == post_id).first()
 
-    def like_post(self, post_id: int, user_id: int) -> bool:
-        post = self.db.query(Post).filter(Post.id == post_id).first()
-        user = self.db.query(User).filter(User.id == user_id).first()
-        if not post or not user:
-            return False
-        if user not in post.liked_by:
-            post.liked_by.append(user)
-            self.db.commit()
-            return True
-        return False
+    def get_posts(self, skip: int, limit: int, current_user_id: Optional[int] = None) -> List[Post]:
+        try:
+            query = self.db.query(Post).order_by(Post.id.desc())
+            query = query.offset(skip).limit(limit)
+            posts = query.all()
+            for post in posts:
+                post.likes_count = len(post.liked_by) if post.liked_by is not None else 0
+                post.liked_by_me = any(user.id == current_user_id for user in post.liked_by) if current_user_id and post.liked_by else False
+            return posts
+        except Exception as e:
+            print(f"Error in get_posts: {str(e)}")
+            raise
 
-    def unlike_post(self, post_id: int, user_id: int) -> bool:
-        post = self.db.query(Post).filter(Post.id == post_id).first()
-        user = self.db.query(User).filter(User.id == user_id).first()
-        if not post or not user:
-            return False
-        if user in post.liked_by:
-            post.liked_by.remove(user)
+    def get_posts_by_user(self, user_id: int, current_user_id: Optional[int] = None) -> List[Post]:
+        try:
+            query = self.db.query(Post).filter(Post.user_id == user_id).order_by(Post.id.desc())
+            posts = query.all()
+            for post in posts:
+                post.likes_count = len(post.liked_by) if post.liked_by is not None else 0
+                post.liked_by_me = any(user.id == current_user_id for user in post.liked_by) if current_user_id and post.liked_by else False
+            return posts
+        except Exception as e:
+            print(f"Error in get_posts_by_user: {str(e)}")
+            raise
+
+    def update(self, post: Post, post_update: dict) -> Post:
+        try:
+            for key, value in post_update.items():
+                setattr(post, key, value)
             self.db.commit()
-            return True
-        return False
+            self.db.refresh(post)
+            return post
+        except Exception as e:
+            self.db.rollback()
+            print(f"Error in update post: {str(e)}")
+            raise
+
+    def delete(self, post: Post):
+        try:
+            self.db.delete(post)
+            self.db.commit()
+        except Exception as e:
+            self.db.rollback()
+            print(f"Error in delete post: {str(e)}")
+            raise
+
+    def like_post(self, post: Post, user: User):
+        try:
+            if user not in post.liked_by:
+                post.liked_by.append(user)
+                self.db.commit()
+                self.db.refresh(post)
+        except Exception as e:
+            self.db.rollback()
+            print(f"Error in like_post: {str(e)}")
+            raise
+
+    def unlike_post(self, post: Post, user: User):
+        try:
+            if user in post.liked_by:
+                post.liked_by.remove(user)
+                self.db.commit()
+                self.db.refresh(post)
+        except Exception as e:
+            self.db.rollback()
+            print(f"Error in unlike_post: {str(e)}")
+            raise

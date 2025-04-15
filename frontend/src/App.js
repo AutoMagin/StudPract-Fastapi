@@ -1,42 +1,28 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import { Header, Home, Users, Auth, Sign, Profile } from './components';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { LoadingProvider } from './contexts/LoadingContext';
-import { ProtectedRoute } from './components/ProtectedRoute';
-import './App.css';
+import { Header, Home, Users, Auth, Sign, Profile, Update, ErrorBoundary } from './components';
 
-function App() {
+export default function App() {
   return (
-    <AuthProvider>
-      <LoadingProvider>
-        <Router>
-          <Header />
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route
-              path="/users"
-              element={
-                <ProtectedRoute>
-                  <Users />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/sign" element={<Sign />} />
-            <Route
-              path="/users/:id"
-              element={
-                <ProtectedRoute>
-                  <Profile />
-                </ProtectedRoute>
-              }
-            />
-          </Routes>
-        </Router>
-      </LoadingProvider>
-    </AuthProvider>
+    <BrowserRouter>
+      <AuthProvider>
+        <LoadingProvider>
+          <ErrorBoundary>
+            <Header />
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/sign" element={<Sign />} />
+              <Route path="/users" element={<Users />} />
+              <Route path="/users/:id" element={<Profile />} />
+              <Route path="/users/:id/update" element={<Update />} />
+            </Routes>
+          </ErrorBoundary>
+        </LoadingProvider>
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
 
-export default App;

@@ -1,41 +1,46 @@
 import React, { useState, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { userService } from '../services/userService';
 import { AuthContext } from '../contexts/AuthContext';
-import { TextField, Button, Snackbar, Typography, Box } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import { TextField, Button, Typography, Box } from '@mui/material';
 
 export function Auth() {
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
-  const { login: loginUser } = useContext(AuthContext);
   const navigate = useNavigate();
+  const { setUser } = useContext(AuthContext);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const user = await userService.login({ login, password });  // Здесь используется userService.login
-      loginUser(user);
-      navigate(`/users/${user.id}`);
+      const response = await userService.login({ login, password });
+      console.log('Login response:', response);  // Логирование ответа
+      localStorage.setItem('token', response.token);
+      setUser(response);
+      navigate('/');
     } catch (err) {
-      setError(err.message);
+      setError(
+        err.response?.status === 401
+          ? 'Неверный логин или пароль'
+          : err.response?.data?.detail || err.message || 'Ошибка входа'
+      );
     }
   };
 
   return (
-    <Box className="auth">
+    <Box className="container">
       <Typography variant="h4" gutterBottom>
         Вход
       </Typography>
-      <form onSubmit={handleSubmit} autoComplete="off">
+      {error && <Typography color="error">{error}</Typography>}
+      <form onSubmit={handleSubmit}>
         <TextField
           label="Логин"
           value={login}
           onChange={(e) => setLogin(e.target.value)}
           fullWidth
           margin="normal"
-          required
-          autoComplete="off"
         />
         <TextField
           label="Пароль"
@@ -44,8 +49,6 @@ export function Auth() {
           onChange={(e) => setPassword(e.target.value)}
           fullWidth
           margin="normal"
-          required
-          autoComplete="off"
         />
         <Button
           type="submit"
@@ -57,14 +60,6 @@ export function Auth() {
           Войти
         </Button>
       </form>
-      {error && (
-        <Snackbar
-          open={!!error}
-          autoHideDuration={6000}
-          message={error}
-          onClose={() => setError(null)}
-        />
-      )}
     </Box>
   );
 }

@@ -1,7 +1,9 @@
-export { Header } from './Header';
-export { Home } from './Home';
-export { Users } from './Users';
-export { Auth } from './Auth';
-export { Sign } from './Sign';
-export { Profile } from './Profile';
-import { Update } from './Update';
+export * from './Auth';
+export * from './Header';
+export * from './Home';
+export * from './Post';
+export * from './Profile';
+export * from './Sign';
+export { default as Update } from './Update';
+export * from './Users';
+export { default as ErrorBoundary } from './ErrorBoundary';
