@@ -37,7 +37,7 @@ Studa Practe — это социальная сеть, где пользоват
 ### 1. Клонирование репозитория
 
 ```bash
-git clone <repository_url>
+git clone https://github.com/AutoMagin/StudPract-Fastapi
 cd studa_practe
 ```
 
