@@ -1,5 +1,9 @@
 # Studa Practe
 
+Сайты:
+Фронт - twiterclonepract.netlify.app
+Бэкенд - https://studpract-fastapi.onrender.com/docs#
+
 ## Описание проекта
 
 Studa Practe — это социальная сеть, где пользователи могут регистрироваться, создавать посты, лайкать их, редактировать профиль и просматривать посты других пользователей. Проект состоит из бэкенда (FastAPI, PostgreSQL) и фронтенда (React, Material-UI).
