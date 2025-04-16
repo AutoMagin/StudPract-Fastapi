@@ -27,7 +27,11 @@ async def startup_event():
 # Настройка CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "https://twitterclonepract.netlify.app"],
+    allow_origins=[
+        "http://localhost:3000",
+        "https://twitterclonepract.netlify.app",
+        "https://67fef26ad5e8bc5428609f7a--twiterclonepract.netlify.app"
+    ],
     allow_credentials=True, 
     allow_methods=["*"],
     allow_headers=["*"],
