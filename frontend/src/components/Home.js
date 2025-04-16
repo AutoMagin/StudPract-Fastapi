@@ -14,7 +14,6 @@ export function Home() {
 
     if (!token) {
       console.log('No token found, redirecting to login...');
-      window.location.href = '/sign'; 
       return;
     }
 
