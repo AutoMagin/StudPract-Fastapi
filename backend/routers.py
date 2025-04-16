@@ -1,4 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
+import jwt
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from database import get_db
@@ -14,6 +16,23 @@ from utils import generate_random_user
 router = APIRouter(prefix="/users", tags=["users"])
 
 token_service = TokenService()
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+SECRET_KEY = "your-secret-key"  # Должен совпадать с ключом, используемым при создании токена
+ALGORITHM = "HS256"
+
+def get_current_user(token: str = Depends(oauth2_scheme)):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise HTTPException(status_code=401, detail="Invalid token")
+        return username
+    except jwt.PyJWTError:
+        raise HTTPException(status_code=401, detail="Invalid token")
+
+
 
 class PaginatedUserResponse(BaseModel):
     users: List[UserResponse]
