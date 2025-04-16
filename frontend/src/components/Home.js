@@ -1,4 +1,3 @@
-// frontend/src/components/Home.js
 import React, { useEffect, useState } from 'react';
 import { postService } from '../services/postService';
 import { useLoading } from '../contexts/LoadingContext';
@@ -11,11 +10,19 @@ export function Home() {
   const { setLoading } = useLoading();
 
   useEffect(() => {
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      console.log('No token found, redirecting to login...');
+      window.location.href = '/sign'; 
+      return;
+    }
+
     setLoading(true);
     postService
       .getPosts()
       .then((response) => {
-        setPosts(response);
+        setPosts(response.posts || response); 
         setLoading(false);
       })
       .catch((err) => {
@@ -27,6 +34,12 @@ export function Home() {
             : err.response?.data?.detail || err.message || 'Произошла ошибка при загрузке постов'
         );
         setLoading(false);
+
+        // Дополнительно: если всё-таки получили 401, перенаправляем
+        if (err.response?.status === 401) {
+          localStorage.removeItem('token'); // Удаляем недействительный токен
+          window.location.href = '/sign';
+        }
       });
   }, [setLoading]);
 
