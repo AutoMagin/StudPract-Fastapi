@@ -19,7 +19,7 @@ token_service = TokenService()
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-SECRET_KEY = "your-secret-key"  # Должен совпадать с ключом, используемым при создании токена
+SECRET_KEY = "tokentokentokentokentokentoken"
 ALGORITHM = "HS256"
 
 def get_current_user(token: str = Depends(oauth2_scheme)):
